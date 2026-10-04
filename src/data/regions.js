@@ -1,0 +1,752 @@
+// 지역(맵) 9곳: 지형 테마, 건물 배치, 주민·환자 대사
+// 좌표계: x 오른쪽(+), z 화면 아래쪽(+). 플레이어는 남쪽(z≈18)에서 시작하고 진료소는 북쪽(z≈-16)에 있어요.
+
+const SKIN = ['#f7dcc3', '#f1c9a5', '#e0ac7e', '#c68b5a', '#9a6440', '#6e4428'];
+
+export const REGIONS = {
+  seoul: {
+    name: '서울 도심',
+    country: '대한민국',
+    flag: '🇰🇷',
+    domestic: true,
+    lonlat: [126.98, 37.57],
+    airport: 'ICN',
+    city: '서울',
+    subtitle: '눈 내리는 겨울, 사람들로 북적이는 도시',
+    badge: { name: '눈꽃 배지', icon: '❄️' },
+    diseases: ['influenza', 'covid19'],
+    tip: '겨울철엔 독감이 유행해요. 10~11월에 예방접종을 맞으면 든든해요.',
+    theme: {
+      sky: ['#9ec4e8', '#eef5fb'], fog: '#e3ecf4',
+      ground: '#eef3f6', ground2: '#dfe7ee', path: '#8f99a3', pathEdge: '#7d8791',
+      far: '#dfe7ee', mountain: '#a9bdd0', mountainSnow: true,
+      trees: [['pine_snow', 0.55], ['bare', 0.45]], treeCount: 26,
+      tuft: '#d3dee7', flowers: null, weather: 'snow', road: true,
+      sun: '#fff6e8', sunI: 1.15, hemiSky: '#e6efff', hemiGround: '#a7b0b8',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 4.2 },
+      { pts: [[-26, 4], [26, 4]], w: 4.2 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '하늘 의원' },
+      { type: 'apartment', pos: [-15, -14], floors: 7, color: '#e9dccb' },
+      { type: 'apartment', pos: [15, -14], floors: 9, color: '#d6e1ea' },
+      { type: 'apartment', pos: [-21, -5], floors: 6, color: '#efd5d0', rot: Math.PI / 2 },
+      { type: 'shop', pos: [-9, -6], color: '#f28b82', sign: '약국', signColor: '#2e7d32' },
+      { type: 'shop', pos: [9, -6], color: '#ffd166', sign: '카페', signColor: '#6d4c41' },
+      { type: 'shop', pos: [17, 9], color: '#90caf9', sign: '편의점', signColor: '#1565c0', rot: -Math.PI / 2 },
+      { type: 'busstop', pos: [-6, 7.5] },
+      { type: 'lamp', pos: [3.2, 0] }, { type: 'lamp', pos: [-3.2, -9] }, { type: 'lamp', pos: [12, 6.5] },
+      { type: 'bench', pos: [-12, 8], rot: 0 },
+      { type: 'snowman', pos: [8, 11] },
+    ],
+    vehicles: [{ type: 'bike', pos: [7, 18] }, { type: 'car', pos: [11, 16.5], color: '#e53935' }],
+    mentor: { pos: [3.5, 13] },
+    guide: {
+      name: '윤하늘', role: '보건소 간호사',
+      look: { skin: SKIN[1], hair: '#2b1d16', style: 'bun', top: '#ffffff', bottom: '#5c8dd6', hat: 'nurse' },
+      pos: [-4, 13],
+      intro: [
+        '어서 오세요, 원정대원님! 저는 이 동네 보건소 간호사 *윤하늘*이에요.',
+        '요즘 서울은 한겨울이라 *호흡기 감염병*이 한창 유행이에요.',
+        '머리 위에 *빨간 느낌표(!)*가 뜬 사람이 몸이 아픈 분들이에요. 말을 걸어서 진료해 주세요!',
+      ],
+      idle: ['기침이 나면 휴지나 옷소매로 가리는 *기침 예절*, 잊지 마세요!', '아플 땐 무리해서 출근하지 말고 집에서 쉬는 게 모두를 지키는 길이에요.'],
+      done: ['서울의 환자들이 모두 나았어요! 정말 고마워요.', '감사의 뜻으로 *눈꽃 배지*를 드릴게요. 다른 지역에도 원정대원님을 기다리는 사람들이 있어요!'],
+    },
+    patients: [
+      {
+        disease: 'influenza', name: '김민준', pos: [-11, -1],
+        look: { skin: SKIN[1], hair: '#1f1a17', style: 'short', top: '#3d5a80', bottom: '#2b2d42', acc: 'tie' },
+        sick: 'flushed',
+        pre: ['콜록콜록... 어제 저녁부터 갑자기 열이 펄펄 나고 온몸이 쑤셔요...', '회사에서도 요즘 다들 아프다던데, 저도 걸린 걸까요?'],
+      },
+      {
+        disease: 'covid19', name: '이순자', pos: [11, -1],
+        look: { skin: SKIN[0], hair: '#b8b8b8', style: 'perm', top: '#a5668b', bottom: '#4a4e69', acc: 'apron' },
+        sick: 'pale',
+        pre: ['킁킁... 이상하네. 커피를 내리는데 향이 하나도 안 나요.', '목도 따끔거리고 열도 좀 있어요. 나이가 있어서 걱정이에요...'],
+      },
+    ],
+    villagers: [
+      {
+        name: '배달원 철수', pos: [14, 12],
+        look: { skin: SKIN[2], hair: '#2b1d16', style: 'short', top: '#ff8a3d', bottom: '#33415c', hat: 'helmet' },
+        lines: ['요즘 독감 때문에 결근하는 사람이 한가득이래요!', '독감 백신은 *매년* 맞아야 한대요. 바이러스가 해마다 조금씩 변하거든요.'],
+      },
+      {
+        name: '학생 지민', pos: [-15, 11],
+        look: { skin: SKIN[0], hair: '#3b2a20', style: 'long', top: '#9bd1e5', bottom: '#355070', acc: 'scarf' },
+        lines: ['코로나19 때 배운 거 기억나요? *환기, 손씻기, 마스크!*', '다른 호흡기 감염병에도 똑같이 통한대요. 습관이 중요해요!'],
+      },
+      {
+        name: '약사 박약사', pos: [-9, -2.5],
+        look: { skin: SKIN[1], hair: '#444', style: 'short', top: '#ffffff', bottom: '#607d8b', acc: 'glasses' },
+        lines: ['감기·독감에 *항생제*를 달라는 손님이 많아요.', '하지만 항생제는 *세균*에만 듣는 약이에요! 바이러스에는 효과가 없고 내성균만 늘려요.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '보건소 게시판', lines: ['📋 *인플루엔자 유행주의보* 발령 중', '38℃ 이상의 갑작스러운 발열과 기침·인후통이 있으면 의료기관을 방문하세요.', '고위험군(65세 이상, 임신부, 만성질환자)은 증상이 생기면 바로 진료를 받으세요.'] },
+    ],
+  },
+
+  school: {
+    name: '햇살초등학교 마을',
+    country: '대한민국',
+    flag: '🇰🇷',
+    domestic: true,
+    lonlat: [127.38, 36.35],
+    city: '대전',
+    subtitle: '벚꽃이 흩날리는 봄날의 학교 마을',
+    badge: { name: '벚꽃 배지', icon: '🌸' },
+    diseases: ['measles', 'chickenpox'],
+    tip: '입학 전에 예방접종 기록을 확인해요. MMR 2차와 수두 백신을 챙겨요!',
+    theme: {
+      sky: ['#7fc4f2', '#e8f6ff'], fog: '#e3f1fb',
+      ground: '#9fd46b', ground2: '#8cc65a', path: '#e6cf98', pathEdge: '#d4b97a',
+      far: '#a8d97a', mountain: '#7fae9c',
+      trees: [['cherry', 0.6], ['round', 0.4]], treeCount: 34,
+      tuft: '#7fbf4d', flowers: ['#ffffff', '#ffd84d', '#ff9ec2'], weather: 'petals',
+      sun: '#fff3dc', sunI: 1.2, hemiSky: '#d6f0ff', hemiGround: '#88b45a',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 3 },
+      { pts: [[0, 2], [-14, 2], [-14, -8]], w: 2.4 },
+      { pts: [[0, 6], [14, 6]], w: 2.4 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '햇살 보건소' },
+      { type: 'school', pos: [-15, -15] },
+      { type: 'playground', pos: [15, -5] },
+      { type: 'house', pos: [-19, 8], color: '#fff3e0', roof: '#e57373' },
+      { type: 'house', pos: [19, 13], color: '#e3f2fd', roof: '#5c6bc0' },
+      { type: 'house', pos: [-11, 18], color: '#f1f8e9', roof: '#8d6e63' },
+      { type: 'bench', pos: [8, 2], rot: 0 },
+      { type: 'fence', pos: [15, -12], len: 12 },
+    ],
+    vehicles: [{ type: 'bike', pos: [7, 18] }, { type: 'car', pos: [11, 16.5], color: '#fdd835' }],
+    guide: {
+      name: '강민지', role: '보건교사',
+      look: { skin: SKIN[0], hair: '#4a3020', style: 'pony', top: '#f8bbd0', bottom: '#6d597a', acc: 'glasses' },
+      pos: [-4, 13],
+      intro: [
+        '반가워요! 햇살초등학교 보건교사 *강민지*예요.',
+        '봄이 되니까 반마다 *열나고 발진*이 생긴 아이들이 늘어서 걱정이에요.',
+        '발진의 모양과 퍼지는 순서를 잘 살펴보면 어떤 병인지 알 수 있을 거예요!',
+      ],
+      idle: ['우리 학교는 입학할 때 *예방접종 기록*을 꼭 확인해요.', '열이 나는 친구는 집에서 쉬어야 반 친구들을 지킬 수 있어요.'],
+      done: ['아이들이 모두 건강하게 학교로 돌아왔어요!', '고마운 마음을 담아 *벚꽃 배지*를 드릴게요!'],
+    },
+    patients: [
+      {
+        disease: 'measles', name: '박지호', pos: [-10, -3], kid: true,
+        look: { skin: SKIN[1], hair: '#2b1d16', style: 'short', top: '#ffcc80', bottom: '#5d8aa8' },
+        sick: 'rash',
+        pre: ['(보호자) 우리 지호가 며칠째 열이 39도가 넘고 콧물이랑 눈곱이 심해요.', '오늘 아침엔 귀 뒤랑 얼굴에 빨간 발진이 생겼어요. 좀 봐 주시겠어요?'],
+      },
+      {
+        disease: 'chickenpox', name: '최하은', pos: [10, 0],
+        look: { skin: SKIN[0], hair: '#3b2416', style: 'twin', top: '#b39ddb', bottom: '#455a64' },
+        sick: 'pox',
+        pre: ['으앙, 몸이 너무 가려워요! 머리랑 배에 물집이 잔뜩 생겼어요.', '긁으면 안 된다는데... 자꾸 손이 가요. 도와주세요!'],
+      },
+    ],
+    villagers: [
+      {
+        name: '교장 선생님', pos: [-8, -10],
+        look: { skin: SKIN[1], hair: '#d9d9d9', style: 'bald', top: '#5d6d7e', bottom: '#2c3e50', acc: 'tie' },
+        lines: ['*MMR 백신*은 생후 12~15개월에 1차, 만 4~6세에 2차를 맞아요.', '2차까지 맞아야 홍역을 확실하게 막을 수 있어요. 허허.'],
+      },
+      {
+        name: '학부모 김씨', pos: [17, 3],
+        look: { skin: SKIN[2], hair: '#1d1d1d', style: 'bob', top: '#81c784', bottom: '#37474f' },
+        lines: ['수두에 걸리면 *물집에 모두 딱지가 앉을 때까지* 학교에 못 간대요.', '보통 발진이 생기고 5일쯤 지나면 된대요.'],
+      },
+      {
+        name: '도윤', pos: [5, 9], kid: true,
+        look: { skin: SKIN[3], hair: '#1a1a1a', style: 'short', top: '#ef5350', bottom: '#1e88e5', hat: 'cap' },
+        lines: ['홍역은 *공기*로도 옮는대!', '같은 교실에 있기만 해도 옮을 수 있대. 엄청 세다!'],
+      },
+    ],
+    signs: [
+      { pos: [3.5, 9], title: '예방접종 안내판', lines: ['💉 *국가예방접종 일정 (일부)*', '생후 12~15개월: MMR 1차, 수두', '만 4~6세: MMR 2차', '빠뜨린 접종은 가까운 보건소나 지정 의료기관에서 맞을 수 있어요.'] },
+    ],
+  },
+
+  rural: {
+    name: '강원 산골 마을',
+    country: '대한민국',
+    flag: '🇰🇷',
+    domestic: true,
+    lonlat: [128.39, 37.37],
+    city: '평창',
+    subtitle: '산과 논밭에 둘러싸인 고요한 마을',
+    badge: { name: '솔잎 배지', icon: '🌲' },
+    diseases: ['tuberculosis', 'sfts'],
+    tip: '농작업·성묘·등산 때는 긴 옷과 기피제! 진드기는 4~11월에 특히 활발해요.',
+    theme: {
+      sky: ['#6fb7ee', '#e6f4ff'], fog: '#dcedf7',
+      ground: '#8fc95d', ground2: '#79b84a', path: '#d5b98a', pathEdge: '#bd9f6d',
+      far: '#7db35a', mountain: '#5e8f6e',
+      trees: [['pine', 0.7], ['round', 0.3]], treeCount: 44,
+      tuft: '#6aa83f', flowers: ['#ffffff', '#fff176', '#ce93d8'], weather: 'none',
+      sun: '#fff2d6', sunI: 1.25, hemiSky: '#d4ecff', hemiGround: '#6f9c45',
+    },
+    paths: [
+      { pts: [[0, 26], [0, 4], [-4, -4], [0, -12]], w: 2.6 },
+      { pts: [[0, 4], [12, 2], [18, -2]], w: 2.2 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '보건진료소' },
+      { type: 'hanok', pos: [-15, 4] },
+      { type: 'hanok', pos: [15, 12], rot: -Math.PI / 2 },
+      { type: 'hanok', pos: [-17, 16], rot: Math.PI / 2 },
+      { type: 'paddy', pos: [14, -12], w: 11, d: 8 },
+      { type: 'tallgrass', pos: [-15, -10], r: 6 },
+      { type: 'pen', pos: [17, 0], w: 7, d: 5, animal: 'cow', count: 2 },
+      { type: 'chickens', pos: [-9, 9], count: 4 },
+      { type: 'jars', pos: [-11, 6] },
+    ],
+    vehicles: [{ type: 'bike', pos: [7, 18] }, { type: 'car', pos: [11, 16.5], color: '#43a047' }],
+    guide: {
+      name: '박덕배', role: '이장님',
+      look: { skin: SKIN[2], hair: '#9e9e9e', style: 'short', top: '#8d6e63', bottom: '#4e342e', hat: 'straw' },
+      pos: [-4, 13],
+      intro: [
+        '아이고, 먼 길 오셨구먼! 이 마을 이장 *박덕배*여.',
+        '공기 좋고 물 맑은 동네인디, 요즘 *오래 기침하는 양반*이랑 *밭일하고 열나는 양반*이 있어서 걱정이여.',
+        '저기 *풀숲*엔 진드기가 많으니께 조심허고!',
+      ],
+      idle: ['벌초·성묘 갈 땐 긴 옷 입고 기피제 꼭 뿌리고 가야 혀.', '기침이 2주 넘게 가믄 감기가 아닐 수도 있당께.'],
+      done: ['허허, 마을 어르신들이 다 나았구먼! 참말로 고마워.', '우리 마을 *솔잎 배지*여. 받아 두라고!'],
+    },
+    patients: [
+      {
+        disease: 'tuberculosis', name: '정만수', pos: [-9, 2],
+        look: { skin: SKIN[2], hair: '#cfcfcf', style: 'short', top: '#7b8d6f', bottom: '#4b4b3f', acc: 'cane' },
+        sick: 'pale',
+        pre: ['쿨럭, 쿨럭... 기침이 벌써 한 달째여.', '감기가 오래간다 했는디... 가래에 피가 비치니께 영 찜찜하구먼.'],
+      },
+      {
+        disease: 'sfts', name: '한영희', pos: [8, -6],
+        look: { skin: SKIN[1], hair: '#a7a7a7', style: 'perm', top: '#e57373', bottom: '#6d4c41', hat: 'farmer' },
+        sick: 'flushed',
+        pre: ['아이고... 밭일하고 온 뒤로 열이 펄펄 나고 자꾸 토혀.', '풀 베고 잠깐 풀밭에 앉아 쉰 것밖에 없는디...'],
+      },
+    ],
+    villagers: [
+      {
+        name: '벌초하는 아저씨', pos: [-8, -12],
+        look: { skin: SKIN[3], hair: '#222', style: 'short', top: '#607d8b', bottom: '#37474f', hat: 'cap' },
+        lines: ['진드기는 풀숲에 숨어 있다가 옷에 착 달라붙어요.', '풀밭에 털썩 앉지 말고 *돗자리*를 까세요. 작업복은 따로 빨고요!'],
+      },
+      {
+        name: '소 키우는 할아버지', pos: [13, 4],
+        look: { skin: SKIN[2], hair: '#e0e0e0', style: 'bald', top: '#a1887f', bottom: '#5d4037' },
+        lines: ['우리 누렁이한테도 진드기가 붙더라고.', '진드기를 *맨손으로 떼면 안 된다*더구먼. 핀셋으로 조심히, 아니면 병원에 가야 혀.'],
+      },
+      {
+        name: '보건진료소장', pos: [5, -10],
+        look: { skin: SKIN[1], hair: '#3e2723', style: 'bob', top: '#ffffff', bottom: '#78909c', acc: 'glasses' },
+        lines: ['2주 넘게 기침하면 꼭 *결핵 검사*를 받아야 해요.', '우리나라는 아직 결핵 환자가 많은 편이고, 특히 어르신 환자가 많아요.'],
+      },
+    ],
+    signs: [
+      { pos: [-9.5, -6], title: '경고판', lines: ['⚠️ *진드기 주의 구역*', '긴 옷 착용 · 풀밭에 눕지 않기 · 기피제 사용', '야외활동 뒤에는 바로 샤워하고 옷은 세탁하세요.', '야외활동 2주 안에 고열·구토·설사가 생기면 의료기관에 진드기 노출 사실을 알려 주세요.'] },
+    ],
+  },
+
+  middleeast: {
+    name: '사막 오아시스 마을',
+    country: '사우디아라비아',
+    flag: '🇸🇦',
+    domestic: false,
+    lonlat: [46.72, 24.71],
+    airport: 'RUH',
+    city: '리야드',
+    subtitle: '대추야자와 낙타가 사는 뜨거운 사막',
+    badge: { name: '모래바람 배지', icon: '🐪' },
+    diseases: ['mers'],
+    tip: '중동에서는 낙타 접촉과 낙타유 생섭취를 피해요. 귀국 후 14일 안에 열이 나면 1339에 먼저 연락!',
+    theme: {
+      sky: ['#5fb0ea', '#fbefd9'], fog: '#f4e3c4',
+      ground: '#e9cf98', ground2: '#dcbc7f', path: '#cfa968', pathEdge: '#bd955a',
+      far: '#e3c58c', mountain: '#c9a26a',
+      trees: [['palm', 1]], treeCount: 18,
+      tuft: '#b9a46a', flowers: null, weather: 'dust',
+      sun: '#fff0d0', sunI: 1.35, hemiSky: '#fff2dc', hemiGround: '#caa56a',
+    },
+    paths: [{ pts: [[0, 26], [0, -12]], w: 3 }],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '오아시스 병원' },
+      { type: 'desert_house', pos: [-15, -12] },
+      { type: 'desert_house', pos: [14, -13], dome: true },
+      { type: 'desert_house', pos: [-18, 6], rot: Math.PI / 2 },
+      { type: 'market_stall', pos: [10, 5], color: '#e76f51' },
+      { type: 'market_stall', pos: [14, 9], color: '#2a9d8f' },
+      { type: 'pen', pos: [-12, -2], w: 8, d: 6, animal: 'camel', count: 3 },
+      { type: 'oasis', pos: [16, -3], r: 3.5 },
+    ],
+    vehicles: [{ type: 'plane', pos: [12, 17] }],
+    guide: {
+      name: '파이살', role: '현지 의사',
+      look: { skin: SKIN[3], hair: '#1a1a1a', style: 'short', top: '#f5f5f5', bottom: '#f5f5f5', hat: 'ghutra', acc: 'beard' },
+      pos: [-4, 13],
+      intro: [
+        '마르하반(환영합니다)! 저는 이 마을 병원 의사 *파이살*이에요.',
+        '이곳은 *낙타 목장*이 많은 사막 마을이에요.',
+        '그런데 최근 목장 주인 한 분이 *숨이 차다*며 힘들어해요. 꼭 살펴봐 주세요!',
+      ],
+      idle: ['낙타는 소중한 친구지만, 아픈 낙타를 맨손으로 만지면 안 돼요.', '이곳에선 낮에 햇볕이 아주 강해요. 물을 자주 마시세요!'],
+      done: ['압둘라 씨가 회복했어요. 슈크란(고맙습니다)!', '우리 마을의 *모래바람 배지*를 받아 주세요.'],
+    },
+    patients: [
+      {
+        disease: 'mers', name: '압둘라', pos: [-6, -6],
+        look: { skin: SKIN[3], hair: '#222', style: 'short', top: '#ece6d8', bottom: '#ece6d8', hat: 'ghutra_red', acc: 'beard' },
+        sick: 'pale',
+        pre: ['콜록... 하아, 하아... 숨이 차서 말하기도 힘드네요.', '우리 낙타 *살마*가 얼마 전부터 콧물을 흘리더니, 저도 열이 나기 시작했어요.'],
+      },
+    ],
+    villagers: [
+      {
+        name: '목장 일꾼 유수프', pos: [-15, 2],
+        look: { skin: SKIN[4], hair: '#111', style: 'short', top: '#d7ccc8', bottom: '#8d6e63', hat: 'kufi' },
+        lines: ['MERS 바이러스는 *단봉낙타*에게서 사람에게 옮을 수 있대요.', '그래서 요즘은 장갑을 끼고 낙타를 돌봐요.'],
+      },
+      {
+        name: '한국인 근로자 김대리', pos: [5, 8],
+        look: { skin: SKIN[1], hair: '#222', style: 'short', top: '#64b5f6', bottom: '#455a64', hat: 'helmet' },
+        lines: ['2015년 한국 메르스 유행 기억하세요?', '환자 한 명에서 시작해 *186명*이 감염됐는데, 대부분 *병원 안*에서 퍼졌대요.'],
+      },
+      {
+        name: '상인 하산', pos: [12, 2],
+        look: { skin: SKIN[3], hair: '#333', style: 'short', top: '#ffffff', bottom: '#ffffff', hat: 'ghutra', acc: 'beard' },
+        lines: ['낙타유 한 잔 어때요? ...아, *끓인 것*만 드려요!', '날 낙타유나 덜 익힌 낙타 고기는 위험하대요.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '안내판', lines: ['🐪 *MERS 예방 수칙*', '낙타 등 동물과의 접촉을 피하세요.', '낙타유·낙타 고기는 반드시 익혀 드세요.', '귀국 후 14일 안에 발열·기침이 생기면 의료기관에 가기 전 *1339*에 먼저 연락하세요.'] },
+    ],
+  },
+
+  guangdong: {
+    name: '광둥 역사 체험 마을',
+    country: '중국 광둥성 (2003년 재현)',
+    flag: '🇨🇳',
+    domestic: false,
+    lonlat: [113.26, 23.13],
+    airport: 'CAN',
+    city: '광저우',
+    subtitle: '2003년 SARS 유행을 재현한 역사 체험 마을',
+    badge: { name: '등불 배지', icon: '🏮' },
+    diseases: ['sars'],
+    tip: '이곳은 2003년 SARS 유행을 재현한 역사 체험 마을이에요. 그때의 교훈을 배워 봐요.',
+    theme: {
+      sky: ['#86b9e0', '#eef4f2'], fog: '#e2ece8',
+      ground: '#9cc77a', ground2: '#86b665', path: '#c9b9a0', pathEdge: '#b3a184',
+      far: '#93bd72', mountain: '#6f9a86',
+      trees: [['banyan', 0.6], ['round', 0.4]], treeCount: 28,
+      tuft: '#77a957', flowers: ['#ff8a80', '#fff59d'], weather: 'none',
+      sun: '#fff1dc', sunI: 1.15, hemiSky: '#e0f0ff', hemiGround: '#7da35e',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 3.4 },
+      { pts: [[-18, 0], [18, 0]], w: 3 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '광둥 병원(2003)' },
+      { type: 'chinese_house', pos: [-14, -12], color: '#f3e0c0' },
+      { type: 'chinese_house', pos: [14, -12], color: '#e8d4b0' },
+      { type: 'chinese_house', pos: [-17, 9], color: '#f0dcc0', rot: Math.PI / 2 },
+      { type: 'market_stall', pos: [8, 5], color: '#c62828' },
+      { type: 'market_stall', pos: [12, 8], color: '#f9a825' },
+      { type: 'cages', pos: [15, 3] },
+      { type: 'lanterns', pos: [0, 0], len: 14 },
+      { type: 'hotel', pos: [17, 16], rot: -Math.PI / 2 },
+    ],
+    vehicles: [{ type: 'plane', pos: [12, 17] }],
+    guide: {
+      name: '량 선생', role: '역사 해설사',
+      look: { skin: SKIN[1], hair: '#2a2a2a', style: 'short', top: '#455a64', bottom: '#263238', acc: 'glasses' },
+      pos: [-4, 13],
+      intro: [
+        '어서 오세요. 저는 역사 해설사 *량*입니다.',
+        '이 마을은 *2003년 SARS 유행*을 재현한 감염병 역사 체험 마을이에요.',
+        '그해 봄, 광둥성에서 시작된 낯선 폐렴이 홍콩을 거쳐 *29개 나라*로 퍼졌지요. 당시 환자를 직접 진료해 보세요.',
+      ],
+      idle: ['SARS는 백신도 치료제도 없이 *격리와 접촉자 추적*만으로 막아 낸 감염병이에요.', '그때의 경험은 이후 MERS와 코로나19 대응의 밑거름이 되었어요.'],
+      done: ['2003년의 교훈을 잘 배우셨군요!', '이 *등불 배지*가 다음 원정길을 밝혀 줄 거예요.'],
+    },
+    patients: [
+      {
+        disease: 'sars', name: '천웨이', pos: [-7, -5],
+        look: { skin: SKIN[1], hair: '#1b1b1b', style: 'short', top: '#ffffff', bottom: '#37474f', hat: 'chef' },
+        sick: 'flushed',
+        pre: ['(2003년 2월) 콜록, 콜록... 열이 39도까지 올랐어요.', '마른기침이 계속 나고 숨이 차요. 우리 식당 손님들도 요즘 폐렴이 많다던데...'],
+      },
+    ],
+    villagers: [
+      {
+        name: '시장 상인 리우', pos: [10, 2],
+        look: { skin: SKIN[1], hair: '#333', style: 'short', top: '#8d6e63', bottom: '#3e2723', acc: 'apron' },
+        lines: ['예전엔 이 시장에서 *사향고양이* 같은 야생동물을 사고팔았어요.', 'SARS 바이러스가 야생동물에서 사람에게 넘어왔다는 게 밝혀진 뒤로는 금지됐지요.'],
+      },
+      {
+        name: '간호사 메이', pos: [5, -10],
+        look: { skin: SKIN[0], hair: '#1d1d1d', style: 'bun', top: '#ffffff', bottom: '#90a4ae', hat: 'nurse' },
+        lines: ['그때 환자의 약 *5분의 1*이 의료진이었어요.', '보호구를 제대로 갖추는 게 얼마나 중요한지 그때 뼈저리게 배웠죠.'],
+      },
+      {
+        name: '호텔 직원 웡', pos: [15, 12],
+        look: { skin: SKIN[1], hair: '#222', style: 'short', top: '#b71c1c', bottom: '#212121', acc: 'tie' },
+        lines: ['2003년, 홍콩의 한 호텔에 묵은 *환자 한 명*에게서 여러 나라로 병이 퍼졌대요.', '그래서 공항마다 *발열 검사*가 시작됐어요.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '역사 기록판', lines: ['📜 *2003 SARS 기록 (WHO)*', '29개 나라 · 8,096명 감염 · 774명 사망', '2003년 7월, WHO는 SARS의 전 세계 전파가 멈췄다고 발표했어요.'] },
+    ],
+  },
+
+  southasia: {
+    name: '갠지스 삼각주 마을',
+    country: '방글라데시',
+    flag: '🇧🇩',
+    domestic: false,
+    lonlat: [90.41, 23.81],
+    airport: 'DAC',
+    city: '다카',
+    subtitle: '강과 함께 살아가는 비 내리는 마을',
+    badge: { name: '물결 배지', icon: '🌊' },
+    diseases: ['cholera', 'typhoid'],
+    tip: '물은 끓이거나 병에 든 생수로! 장티푸스 백신은 출국 최소 2주 전에 맞아요.',
+    theme: {
+      sky: ['#8aa9c4', '#dfe8ee'], fog: '#cfdde6',
+      ground: '#86b95c', ground2: '#6fa548', path: '#b9946a', pathEdge: '#9f7b53',
+      far: '#7aab55', mountain: '#6c8f7a',
+      trees: [['palm', 0.5], ['banana', 0.5]], treeCount: 30,
+      tuft: '#5f9a3d', flowers: ['#ffeb3b', '#ff7043'], weather: 'rain',
+      sun: '#f2f2f2', sunI: 0.95, hemiSky: '#cfdbe6', hemiGround: '#6b8f4a',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 2.8 },
+      { pts: [[0, 2], [-12, 0]], w: 2.2 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '마을 보건소' },
+      { type: 'river', pos: [20, 0], w: 9 },
+      { type: 'stilt_house', pos: [12, -10] },
+      { type: 'stilt_house', pos: [12, 8], rot: Math.PI },
+      { type: 'stilt_house', pos: [-16, -10] },
+      { type: 'stilt_house', pos: [-18, 8], rot: Math.PI / 2 },
+      { type: 'well', pos: [-8, 2] },
+      { type: 'market_stall', pos: [-12, 13], color: '#ffb300' },
+      { type: 'boat', pos: [19, 3] },
+    ],
+    vehicles: [{ type: 'plane', pos: [-12, 19], rot: Math.PI / 6 }],
+    guide: {
+      name: '파티마', role: '지역 보건요원',
+      look: { skin: SKIN[3], hair: '#111', style: 'long', top: '#26a69a', bottom: '#00796b', hat: 'scarf_teal' },
+      pos: [-4, 13],
+      intro: [
+        '어서 오세요! 저는 지역 보건요원 *파티마*예요.',
+        '이 마을은 강과 함께 살아가요. 그런데 *홍수가 지나가면* 물 때문에 아픈 사람이 늘어나요.',
+        '오늘은 *설사가 심한 분*과 *열이 오래가는 분*이 있어요. 도와주세요!',
+      ],
+      idle: ['물은 꼭 끓여서 마셔요. 홍수 뒤엔 우물물도 오염될 수 있어요.', '손을 비누로 씻는 것만으로도 많은 병을 막을 수 있어요!'],
+      done: ['마을 사람들이 모두 건강해졌어요! 단니요밧(고맙습니다)!', '우리 마을의 *물결 배지*예요. 깨끗한 물을 기억해 주세요.'],
+    },
+    patients: [
+      {
+        disease: 'cholera', name: '라힘', pos: [-10, -4],
+        look: { skin: SKIN[4], hair: '#111', style: 'short', top: '#90caf9', bottom: '#5d4037', acc: 'lungi' },
+        sick: 'pale',
+        pre: ['배는 안 아픈데... 화장실을 벌써 스무 번은 갔어요.', '쌀뜨물 같은 설사가 멈추질 않고 다리에 쥐가 나요. 입이 바짝바짝 말라요...'],
+      },
+      {
+        disease: 'typhoid', name: '아이샤', pos: [6, -4],
+        look: { skin: SKIN[3], hair: '#151515', style: 'long', top: '#f06292', bottom: '#ad1457', hat: 'scarf_pink' },
+        sick: 'flushed',
+        pre: ['열이 일주일째 안 내려요... 날마다 계단처럼 조금씩 더 올라요.', '머리도 아프고 배도 아파요. 길거리 음료를 자주 사 먹었는데 그것 때문일까요?'],
+      },
+    ],
+    villagers: [
+      {
+        name: '우물가 아주머니', pos: [-6, 5],
+        look: { skin: SKIN[4], hair: '#222', style: 'bun', top: '#ffb74d', bottom: '#e65100', hat: 'scarf_orange' },
+        lines: ['이 우물에 홍수 때 흙탕물이 들어갔어요.', '그래서 요즘은 *꼭 끓여서* 마셔요. 염소 소독약을 넣기도 하고요.'],
+      },
+      {
+        name: '노점 상인', pos: [-14, 10],
+        look: { skin: SKIN[4], hair: '#111', style: 'short', top: '#fff176', bottom: '#6d4c41', acc: 'beard' },
+        lines: ['우리 가게는 음식 만들기 전에 *비누로 손*을 꼭 씻어요!', '"끓이거나, 익히거나, 껍질을 벗기거나, 아니면 먹지 마라!" 손님들께도 알려 드려요.'],
+      },
+      {
+        name: '어부', pos: [15, -3],
+        look: { skin: SKIN[5], hair: '#222', style: 'short', top: '#4db6ac', bottom: '#455a64', hat: 'straw' },
+        lines: ['1817년, 바로 이 *갠지스강 삼각주*에서 첫 번째 콜레라 대유행이 시작됐대요.', '그 뒤로 콜레라는 배와 사람을 따라 전 세계로 퍼졌어요.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '보건소 안내판', lines: ['💧 *집에서 경구수액(ORS) 만들기*', '깨끗한 물 1L + 설탕 6티스푼 + 소금 반 티스푼', '설사로 잃은 물과 전해질을 채워 줘요. 가능하면 약국의 ORS 가루를 쓰세요.'] },
+    ],
+  },
+
+  seasia: {
+    name: '메콩 꽃시장 마을',
+    country: '베트남',
+    flag: '🇻🇳',
+    domestic: false,
+    lonlat: [106.63, 10.82],
+    airport: 'SGN',
+    city: '호찌민',
+    subtitle: '오토바이와 꽃 화분이 가득한 열대 마을',
+    badge: { name: '연꽃 배지', icon: '🪷' },
+    diseases: ['dengue'],
+    tip: '숲모기는 낮에도 물어요. 모기 기피제와 얇은 긴 옷을 챙겨요.',
+    theme: {
+      sky: ['#5cb8f0', '#f1fbff'], fog: '#e2f4f7',
+      ground: '#8fd16a', ground2: '#76bf52', path: '#d9b38c', pathEdge: '#c49a70',
+      far: '#7cc35a', mountain: '#5d9b7e',
+      trees: [['palm', 0.6], ['banana', 0.4]], treeCount: 30,
+      tuft: '#5fae3f', flowers: ['#ff4081', '#ffeb3b', '#ffffff'], weather: 'none',
+      sun: '#fff6e0', sunI: 1.3, hemiSky: '#dff4ff', hemiGround: '#6cab47',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 3 },
+      { pts: [[-18, 3], [18, 3]], w: 2.6 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '보건소' },
+      { type: 'tube_house', pos: [-14, -12], color: '#ffd54f' },
+      { type: 'tube_house', pos: [-9, -13], color: '#4dd0e1' },
+      { type: 'tube_house', pos: [10, -13], color: '#f48fb1' },
+      { type: 'tube_house', pos: [15, -12], color: '#aed581' },
+      { type: 'flower_shop', pos: [12, 8] },
+      { type: 'puddles', pos: [-14, 6], r: 4 },
+      { type: 'tires', pos: [-17, 12] },
+      { type: 'scooter', pos: [-6, 8], color: '#e53935' },
+      { type: 'scooter', pos: [7, 13], color: '#1e88e5' },
+    ],
+    vehicles: [{ type: 'plane', pos: [13, 18] }],
+    guide: {
+      name: '쩐', role: '보건소 의사',
+      look: { skin: SKIN[1], hair: '#121212', style: 'short', top: '#ffffff', bottom: '#3949ab', acc: 'glasses' },
+      pos: [-4, 13],
+      intro: [
+        '신 짜오(안녕하세요)! 보건소 의사 *쩐*이에요.',
+        '지금은 *우기*라 비가 자주 오고 모기가 많아졌어요.',
+        '꽃시장에서 일하는 분이 *눈 뒤가 아프고 열이 심하다*고 해요. 진찰을 부탁해요!',
+      ],
+      idle: ['화분 받침, 폐타이어, 빈 병... 고인 물은 전부 *모기 놀이터*예요.', '이 마을 숲모기는 낮에 더 활발해요!'],
+      done: ['깜 언(고맙습니다)! 마을 모기 서식지도 함께 치웠어요.', '*연꽃 배지*를 받아 주세요!'],
+    },
+    patients: [
+      {
+        disease: 'dengue', name: '응우옌 티 마이', pos: [8, -4],
+        look: { skin: SKIN[1], hair: '#141414', style: 'long', top: '#fff176', bottom: '#5d4037', hat: 'non_la' },
+        sick: 'flushed',
+        pre: ['아야야... 눈 뒤가 욱신욱신하고 뼈가 부서질 것처럼 아파요.', '사흘 전부터 열이 40도까지 올랐어요. 가게에서 모기에 엄청 물렸거든요.'],
+      },
+    ],
+    villagers: [
+      {
+        name: '오토바이 기사 투안', pos: [-8, 9],
+        look: { skin: SKIN[2], hair: '#151515', style: 'short', top: '#81d4fa', bottom: '#37474f', hat: 'helmet' },
+        lines: ['말라리아 모기는 밤에 물지만, *숲모기는 낮*에 물어요!', '낮이라고 방심하면 안 돼요.'],
+      },
+      {
+        name: '꽃가게 사장님', pos: [14, 4],
+        look: { skin: SKIN[1], hair: '#2b2b2b', style: 'bun', top: '#ce93d8', bottom: '#4a148c', acc: 'apron' },
+        lines: ['화분 받침에 고인 물에서 모기 유충이 꿈틀거리더라고요!', '이제 *일주일에 한 번* 물을 싹 비우기로 했어요.'],
+      },
+      {
+        name: '여행객 지수', pos: [-12, -3],
+        look: { skin: SKIN[0], hair: '#5d4037', style: 'pony', top: '#ffab91', bottom: '#90a4ae', hat: 'sunhat' },
+        lines: ['뎅기열이 의심되면 해열제로 *아세트아미노펜*만 먹으래요.', '아스피린이나 이부프로펜은 *출혈 위험* 때문에 피해야 한대요!'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '방역 안내판', lines: ['🦟 *모기 서식지를 없애요*', '화분 받침, 폐타이어, 빈 병·캔에 고인 물을 일주일에 한 번 비우세요.', '물탱크와 항아리는 뚜껑을 꼭 덮으세요.'] },
+    ],
+  },
+
+  westafrica: {
+    name: '붉은 흙 숲 마을',
+    country: '시에라리온',
+    flag: '🇸🇱',
+    domestic: false,
+    lonlat: [-13.23, 8.48],
+    airport: 'FNA',
+    city: '프리타운',
+    subtitle: '붉은 흙길과 망고나무가 있는 열대 마을',
+    badge: { name: '망고 배지', icon: '🥭' },
+    diseases: ['malaria', 'ebola'],
+    tip: '말라리아 예방약은 출국 전부터 먹기 시작해요. 일부 아프리카 나라는 황열 예방접종 증명서가 필요해요.',
+    theme: {
+      sky: ['#6cb6e6', '#f6f0df'], fog: '#efe6cf',
+      ground: '#7fbf55', ground2: '#69a843', path: '#c8693a', pathEdge: '#a8532b',
+      far: '#6aa548', mountain: '#4f8a5c',
+      trees: [['mango', 0.6], ['palm', 0.4]], treeCount: 36,
+      tuft: '#5a9a35', flowers: ['#ff7043', '#ffee58'], weather: 'none',
+      sun: '#fff1d4', sunI: 1.3, hemiSky: '#e6f2ff', hemiGround: '#8a6a3c',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 3 },
+      { pts: [[0, 0], [-14, -6]], w: 2.4 },
+      { pts: [[0, 5], [12, 8]], w: 2.4 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '지역 보건소' },
+      { type: 'hut', pos: [-15, 4] },
+      { type: 'hut', pos: [-19, 12] },
+      { type: 'hut', pos: [-11, 17] },
+      { type: 'hut', pos: [16, 14] },
+      { type: 'tent', pos: [-15, -14], label: '에볼라 치료센터' },
+      { type: 'tent', pos: [-9, -16] },
+      { type: 'swamp', pos: [15, -8], r: 5 },
+      { type: 'bigtree', pos: [17, 3] },
+    ],
+    vehicles: [{ type: 'plane', pos: [12, 19], rot: -Math.PI / 8 }],
+    guide: {
+      name: '이사투', role: '지역 보건요원',
+      look: { skin: SKIN[5], hair: '#111', style: 'bun', top: '#ffb300', bottom: '#2e7d32', hat: 'headwrap' },
+      pos: [-4, 13],
+      intro: [
+        '환영해요! 저는 지역 보건요원 *이사투*예요.',
+        '우리 마을은 *2014년 에볼라 유행*을 함께 이겨 냈어요.',
+        '하지만 *말라리아*는 지금도 아이들에게 큰 위협이에요. 오늘도 아픈 사람들이 있어요.',
+      ],
+      idle: ['모기장 안에서 자는 것만으로도 말라리아를 크게 줄일 수 있어요.', '에볼라 치료센터 근처에서는 안내에 따라 움직여 주세요.'],
+      done: ['아이도, 모하메드 씨도 모두 회복했어요!', '우리 마을의 *망고 배지*예요. 달콤한 망고처럼 좋은 일만 가득하길!'],
+    },
+    patients: [
+      {
+        disease: 'malaria', name: '아미나타', pos: [-8, -2], kid: true,
+        look: { skin: SKIN[5], hair: '#111', style: 'twin', top: '#ff8a65', bottom: '#6a1b9a' },
+        sick: 'pale',
+        pre: ['(엄마 파투) 아이가 오들오들 떨다가 펄펄 끓고, 땀을 흠뻑 흘리고 나면 열이 내렸다가 또 그래요.', '밤에 모기에 많이 물렸어요. 얼굴도 창백해졌어요...'],
+      },
+      {
+        disease: 'ebola', name: '모하메드', pos: [-12, -10],
+        look: { skin: SKIN[5], hair: '#111', style: 'short', top: '#a5d6a7', bottom: '#33691e' },
+        sick: 'pale',
+        pre: ['(조금 떨어져서 이야기해요) 아버지 장례를 치른 뒤로 몸이 이상해요.', '너무 지치고 열이 나요. 어제부터는 토하고 설사도 해요...'],
+      },
+    ],
+    villagers: [
+      {
+        name: '모기장 봉사자', pos: [10, 6],
+        look: { skin: SKIN[4], hair: '#111', style: 'short', top: '#4fc3f7', bottom: '#263238', hat: 'cap' },
+        lines: ['*살충 처리 모기장*을 나눠 드리고 있어요!', '말라리아 모기(얼룩날개모기)는 주로 *밤*에 물거든요.'],
+      },
+      {
+        name: '마을 원로', pos: [-17, 7],
+        look: { skin: SKIN[5], hair: '#e0e0e0', style: 'bald', top: '#8e24aa', bottom: '#4a148c', acc: 'cane' },
+        lines: ['에볼라 때 *장례 방식*을 바꾸는 건 정말 어려운 일이었네.', '하지만 시신을 맨손으로 씻기지 않은 덕분에 많은 생명을 지켰지.'],
+      },
+      {
+        name: '생존자 아부', pos: [-4, -10],
+        look: { skin: SKIN[5], hair: '#111', style: 'short', top: '#ffffff', bottom: '#455a64' },
+        lines: ['저는 *에볼라 생존자*예요. 치료센터에서 수액 치료를 받고 살아났어요.', '생존자를 피하지 말아 주세요. 회복된 우리는 이웃을 돕고 있어요.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '보건 안내판', lines: ['🦟 *말라리아는 어린이에게 특히 위험해요*', '해마다 전 세계에서 약 60만 명이 말라리아로 숨지고, 대부분이 아프리카의 5세 미만 어린이예요.', '모기장 안에서 자고, 열이 나면 바로 검사를 받으세요.'] },
+    ],
+  },
+
+  southafrica: {
+    name: '바오밥 언덕 마을',
+    country: '남아프리카공화국',
+    flag: '🇿🇦',
+    domestic: false,
+    lonlat: [28.05, -26.2],
+    airport: 'JNB',
+    city: '요하네스버그',
+    subtitle: '아카시아와 바오밥이 서 있는 초원 마을',
+    badge: { name: '빨간 리본 배지', icon: '🎗️' },
+    diseases: ['hiv'],
+    tip: 'HIV는 일상생활 접촉으로는 옮지 않아요. 편견 대신 정확한 지식을 챙겨 가요!',
+    theme: {
+      sky: ['#5aaee8', '#fff3dc'], fog: '#f3e8cf',
+      ground: '#c9c271', ground2: '#b4ad5c', path: '#c99a62', pathEdge: '#ad7f4a',
+      far: '#c2b866', mountain: '#9d8f5c',
+      trees: [['acacia', 0.75], ['baobab', 0.25]], treeCount: 22,
+      tuft: '#a69b45', flowers: ['#ffca28', '#ff7043'], weather: 'none',
+      sun: '#fff0d2', sunI: 1.3, hemiSky: '#ffeccc', hemiGround: '#a8964f',
+    },
+    paths: [
+      { pts: [[0, 26], [0, -12]], w: 3 },
+      { pts: [[0, 4], [-14, 6]], w: 2.4 },
+    ],
+    buildings: [
+      { type: 'clinic', pos: [0, -16], name: '희망 클리닉', ribbon: true },
+      { type: 'house', pos: [-15, -11], color: '#fff8e1', roof: '#6d4c41' },
+      { type: 'house', pos: [15, -11], color: '#e0f2f1', roof: '#00897b' },
+      { type: 'house', pos: [-18, 10], color: '#fce4ec', roof: '#ad1457', rot: Math.PI / 2 },
+      { type: 'house', pos: [16, 10], color: '#fffde7', roof: '#f9a825', rot: -Math.PI / 2 },
+      { type: 'ribbon_banner', pos: [8, -6] },
+      { type: 'bench', pos: [-8, 5], rot: 0 },
+    ],
+    vehicles: [{ type: 'plane', pos: [12, 18] }],
+    guide: {
+      name: '노물라', role: '간호사',
+      look: { skin: SKIN[5], hair: '#111', style: 'afro', top: '#ffffff', bottom: '#5c6bc0', hat: 'nurse' },
+      pos: [-4, 13],
+      intro: [
+        '사우보나(안녕하세요)! 희망 클리닉 간호사 *노물라*예요.',
+        '남아프리카공화국은 *HIV 감염인이 세계에서 가장 많은* 나라 중 하나예요.',
+        '하지만 치료제 덕분에 희망도 커지고 있어요. 오늘 오래 아팠던 환자가 와 있어요.',
+      ],
+      idle: ['검사를 받는 건 부끄러운 일이 아니에요. 알아야 치료할 수 있어요!', 'HIV는 악수나 포옹, 함께 밥 먹기로는 절대 옮지 않아요.'],
+      done: ['타보 씨가 치료를 시작했어요. 응기야봉가(고맙습니다)!', '연대와 희망의 상징, *빨간 리본 배지*를 드릴게요.'],
+    },
+    patients: [
+      {
+        disease: 'hiv', name: '타보', pos: [-7, -4],
+        look: { skin: SKIN[5], hair: '#111', style: 'short', top: '#ffb74d', bottom: '#3e2723' },
+        sick: 'pale',
+        pre: ['몇 달째 살이 빠지고 설사가 계속돼요...', '입안에 하얀 것도 생겼고 자꾸 감기에 걸려요. 무슨 병일까 무서워서 병원을 미뤘어요.'],
+      },
+    ],
+    villagers: [
+      {
+        name: '상담사 레라토', pos: [10, -3],
+        look: { skin: SKIN[4], hair: '#111', style: 'afro', top: '#e91e63', bottom: '#311b92' },
+        lines: ['HIV는 *악수, 포옹, 식기 공유, 모기*로는 옮지 않아요.', '편견이 사람들을 검사에서 멀어지게 만들어요. 정확한 지식이 최고의 예방약이에요.'],
+      },
+      {
+        name: '청년 시포', pos: [-12, 4],
+        look: { skin: SKIN[5], hair: '#111', style: 'short', top: '#43a047', bottom: '#212121', hat: 'cap' },
+        lines: ['저는 정기적으로 HIV 검사를 받아요!', '감염됐어도 일찍 알고 치료하면 건강하게 살 수 있대요.'],
+      },
+      {
+        name: '할머니 마마 조이', pos: [14, 5],
+        look: { skin: SKIN[5], hair: '#e0e0e0', style: 'bun', top: '#ff7043', bottom: '#5d4037', hat: 'headwrap_red' },
+        lines: ['매년 *12월 1일*은 세계 에이즈의 날이란다.', '빨간 리본을 달고 감염인과 함께한다는 마음을 나누지.'],
+      },
+    ],
+    signs: [
+      { pos: [-3.5, 9], title: '클리닉 게시판', lines: ['🎗️ *U=U (미검출 = 전파 불가)*', '꾸준한 치료로 혈액 속 바이러스가 검출되지 않으면 성 접촉으로 전파되지 않아요.', '무료·익명 HIV 검사를 받을 수 있어요.'] },
+    ],
+  },
+};
+
+for (const [id, r] of Object.entries(REGIONS)) r.id = id;
+
+export const REGION_ORDER = ['seoul', 'school', 'rural', 'middleeast', 'guangdong', 'southasia', 'seasia', 'westafrica', 'southafrica'];
+
+export const DISEASE_REGION = {};
+for (const r of Object.values(REGIONS)) for (const d of r.diseases) DISEASE_REGION[d] = r.id;
+
+// 이동수단 해금 조건 (배지 개수)
+export const VEHICLES = {
+  bike: { name: '바이크', icon: '🛵', need: 0, kind: 'road', speed: 60 },
+  car: { name: '자동차', icon: '🚗', need: 1, kind: 'road', speed: 80 },
+  plane: { name: '여객기', icon: '✈️', need: 0, kind: 'air', speed: 850 },
+  jet: { name: '제트기', icon: '🛩️', need: 3, kind: 'air', speed: 950 },
+};
+
+export const INCHEON = { lonlat: [126.45, 37.46], code: 'ICN', city: '인천' };
