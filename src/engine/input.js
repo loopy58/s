@@ -21,7 +21,8 @@ export class Input {
       }
       if (k === 'arrowup' || k === 'w') this.emit('up', e);
       if (k === 'arrowdown' || k === 's') this.emit('down', e);
-      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].includes(k)) e.preventDefault();
+      // Tab은 수첩을 열 때만 막고(emit에서 처리), 창 안에서는 초점 이동에 그대로 써요.
+      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
       this.keys.add(k);
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.key.toLowerCase()));
