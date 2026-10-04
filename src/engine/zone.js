@@ -1,7 +1,7 @@
 // 지역 데이터로 3D 맵(지형·건물·주민·소품)을 조립합니다.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { toon, basic, G, mesh, canvasTexture, bakeStatic, FONT_UI } from './toon.js';
+import { toon, basic, G, mesh, canvasTexture, bakeStatic, disposeTree, FONT_UI } from './toon.js';
 import { makeTree, makeRock, makeBuilding, makeSignpost, makeVehicle, makeAnimal, animateAnimal } from './props.js';
 import { makeCharacter, animateCharacter, makeOwl, animateOwl } from './characters.js';
 import { mulberry32, hashString } from '../util.js';
@@ -44,6 +44,7 @@ function markerTexture(kind) {
     ctx.textBaseline = 'middle';
     ctx.fillText(kind === 'done' ? '♥' : '!', 64, 70);
   });
+  t.userData.shared = true;
   markerTex[kind] = t;
   return t;
 }
@@ -958,11 +959,7 @@ export class Zone {
   }
 
   dispose() {
-    // 합쳐서 새로 만든 지오메트리만 해제해요(공유 지오메트리는 다른 지역에서 다시 씁니다).
-    this.group.traverse((o) => {
-      if (o.userData.baked && o.geometry) o.geometry.dispose();
-      if ((o.isPoints || o.isLineSegments) && o.geometry) o.geometry.dispose();
-    });
+    disposeTree(this.group);
   }
 }
 

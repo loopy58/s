@@ -1,6 +1,6 @@
 // 이동 장면: 구름 위를 나는 비행기, 길을 달리는 바이크·자동차
 import * as THREE from 'three';
-import { toon, G, mesh, canvasTexture, texturedToon } from './toon.js';
+import { toon, G, mesh, canvasTexture, texturedToon, disposeTree } from './toon.js';
 import { makeVehicle, makeTree } from './props.js';
 import { makeCharacter } from './characters.js';
 import { PLAYER_LOOK } from './player.js';
@@ -132,6 +132,7 @@ export class Cutscene {
 
   stop() {
     this.active = false;
+    if (this.scene) disposeTree(this.scene);
     this.scene = null;
     this.items = [];
   }

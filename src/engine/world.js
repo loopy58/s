@@ -81,14 +81,15 @@ void main() {
     const h = window.innerHeight;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
-    // 세로 화면에서는 시야를 조금 넓힙니다.
-    this.camera.fov = w < h ? 52 : 38;
+    // 세로 화면에서는 시야를 넓히고 카메라를 조금 더 뒤로 뺍니다.
+    this.camera.fov = w < h ? 50 : 38;
+    this.portraitScale = w < h ? 1.32 : 1;
     this.camera.updateProjectionMatrix();
   }
 
   follow(target, dt, snap = false) {
     this.camTarget.lerp(target, snap ? 1 : 1 - Math.pow(0.0008, dt));
-    const off = this.camOffset.clone().multiplyScalar(this.zoom);
+    const off = this.camOffset.clone().multiplyScalar(this.zoom * (this.portraitScale || 1));
     const desired = this.camTarget.clone().add(off);
     if (snap) this.camera.position.copy(desired);
     else this.camera.position.lerp(desired, 1 - Math.pow(0.002, dt));

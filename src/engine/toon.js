@@ -29,6 +29,7 @@ export function toon(color, opts = {}) {
     });
     // 툰 재질은 flatShading을 지원하지 않아서, 정적 메시를 합칠 때 면 법선을 다시 계산해요.
     m.userData.flat = !!opts.flat;
+    m.userData.shared = true;
     matCache.set(key, m);
   }
   return m;
@@ -45,8 +46,25 @@ export function basic(color, opts = {}) {
 const geoCache = new Map();
 function cached(key, make) {
   let g = geoCache.get(key);
-  if (!g) { g = make(); geoCache.set(key, g); }
+  if (!g) {
+    g = make();
+    g.userData.shared = true;
+    geoCache.set(key, g);
+  }
   return g;
+}
+
+// 지역을 바꿀 때 그 지역에서만 쓰던 지오메트리·재질·텍스처를 해제해요(공유 자원은 남겨 둠).
+export function disposeTree(root) {
+  root.traverse((o) => {
+    if (o.geometry && !o.geometry.userData.shared) o.geometry.dispose();
+    const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+    for (const m of mats) {
+      if (m.userData?.shared) continue;
+      if (m.map && !m.map.userData?.shared) m.map.dispose();
+      m.dispose();
+    }
+  });
 }
 
 export const G = {

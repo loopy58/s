@@ -14,7 +14,7 @@ import { REGIONS, REGION_ORDER, VEHICLES, DISEASE_REGION } from './data/regions.
 import { DISEASES, DISEASE_ORDER } from './data/diseases.js';
 import { loadSave, writeSave, freshSave, clearSave } from './save.js';
 import { initAudio, sfx, playMusic, setSound } from './audio.js';
-import { el, rich, sleep, todayString, clamp } from './util.js';
+import { el, rich, sleep, todayString, clamp, josa } from './util.js';
 
 const SPEAKER_COLORS = { mentor: '#9c6b45', guide: '#f09a3e', patient: '#e86a6a', villager: '#4f9fd6', sign: '#7a9a52' };
 const PITCH = { mentor: 0.8, guide: 1.15, patient: 0.95, villager: 1.05, sign: 1 };
@@ -59,6 +59,13 @@ class Game {
     }, { passive: true });
     window.addEventListener('resize', () => this.cutscene.resize());
     window.claude?.hot?.snapshot?.(() => ({ save: this.save }));
+    // 브라우저는 사용자가 한 번 누른 뒤에야 소리를 허락해요.
+    const unlock = () => {
+      initAudio();
+      if (this.save?.sound !== false && this.zone) playMusic(this.mode === 'title' ? 'title' : this.zone.region.id);
+    };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
 
     this.loop = this.loop.bind(this);
     requestAnimationFrame(this.loop);
@@ -70,6 +77,8 @@ class Game {
   async boot(hotData) {
     if (this.booted) return;
     this.booted = true;
+    setSound(this.save?.sound !== false);
+    this.hud.setSound(this.save?.sound !== false);
     if (hotData.save) {
       this.loadZone(this.save.region);
       this.enterWorld();
@@ -525,7 +534,7 @@ class Game {
     this.dialogue.close();
     const after = before + 1;
     for (const [id, v] of Object.entries(VEHICLES)) {
-      if (v.need === after && v.need > 0) this.hud.toast(`🎉 새 이동수단 해금: ${v.icon} *${v.name}*을(를) 탈 수 있어요!`, 'good', 5200);
+      if (v.need === after && v.need > 0) this.hud.toast(`🎉 새 이동수단 해금! 이제 ${v.icon} *${josa(v.name, '을/를')}* 탈 수 있어요.`, 'good', 5200);
     }
     if (DISEASE_ORDER.every((d) => this.save.cleared[d]) && !this.save.finished) {
       this.save.finished = true;
