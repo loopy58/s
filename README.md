@@ -89,3 +89,8 @@ scripts/check-data.mjs  데이터 정합성 검사 (npm run check)
 
 게임 속 의학 정보는 질병관리청과 세계보건기구(WHO)가 공개한 일반적인 내용을 학습용으로 쉽게 정리한 것이고, 등장인물과 사례는 학습을 위해 만든 이야기예요.
 실제 진료·처방을 대신하지 않으니, 아플 때는 꼭 의료기관에서 진료를 받으세요. 감염병이 의심되면 질병관리청 콜센터(국번 없이 1339)에 문의할 수 있어요.
+
+## 같은 저장소의 다른 게임
+
+[`zogakzogak-puzzle/`](zogakzogak-puzzle/) 폴더에는 **조각조각 퍼즐**(zogakzogakpuzzle.com용 직소 퍼즐 웹게임)이 들어 있어요.
+빌드 없이 그 폴더만 정적 호스팅에 올리면 되고, 실행·배포 방법은 [zogakzogak-puzzle/README.md](zogakzogak-puzzle/README.md)에 있어요.

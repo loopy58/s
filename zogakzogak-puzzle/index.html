@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조각조각 퍼즐 - 내 사진으로 만드는 직소 퍼즐</title>
+<meta name="description" content="내 사진이나 매일 새로 그려지는 그림으로 즐기는 무료 직소 퍼즐. 빠르고 정확하게 맞출수록 높은 점수! 설치 없이 브라우저에서 바로 플레이하세요.">
+<link rel="canonical" href="https://zogakzogakpuzzle.com/">
+<meta name="theme-color" content="#ff7a2f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="조각조각">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="조각조각 퍼즐">
+<meta property="og:title" content="조각조각 퍼즐">
+<meta property="og:description" content="그림을 조각조각, 다시 하나로. 내 사진으로 만드는 직소 퍼즐.">
+<meta property="og:url" content="https://zogakzogakpuzzle.com/">
+<meta property="og:image" content="https://zogakzogakpuzzle.com/icons/og.jpg">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-screen="home">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="logo-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ff6a3d"/></linearGradient>
+    <linearGradient id="logo-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ec3ff"/><stop offset="1" stop-color="#d9f1ff"/></linearGradient>
+    <clipPath id="logo-clip"><path d="M22 30C32 30 47 35 42 25C37 15 57 15 52 25C47 35 62 30 72 30C72 40 67 55 77 50C87 45 87 65 77 60C67 55 72 70 72 80C62 80 47 85 52 75C57 65 37 65 42 75C47 85 32 80 22 80C22 70 17 55 27 60C37 65 37 45 27 50C17 55 22 40 22 30Z"/></clipPath>
+    <symbol id="logo" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="24" fill="url(#logo-bg)"/>
+      <path transform="translate(1.5 2.5)" fill="rgba(0,0,0,.18)" d="M22 30C32 30 47 35 42 25C37 15 57 15 52 25C47 35 62 30 72 30C72 40 67 55 77 50C87 45 87 65 77 60C67 55 72 70 72 80C62 80 47 85 52 75C57 65 37 65 42 75C47 85 32 80 22 80C22 70 17 55 27 60C37 65 37 45 27 50C17 55 22 40 22 30Z"/>
+      <g clip-path="url(#logo-clip)">
+        <rect width="100" height="100" fill="url(#logo-sky)"/>
+        <circle cx="60" cy="38" r="7" fill="#fff3b0"/>
+        <path d="M8 84L36 54L50 66L62 54L94 84Z" fill="#45a85f"/>
+        <path d="M0 76Q30 66 60 74T100 72V100H0Z" fill="#2e8a4a"/>
+      </g>
+      <path fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" d="M22 30C32 30 47 35 42 25C37 15 57 15 52 25C47 35 62 30 72 30C72 40 67 55 77 50C87 45 87 65 77 60C67 55 72 70 72 80C62 80 47 85 52 75C57 65 37 65 42 75C47 85 32 80 22 80C22 70 17 55 27 60C37 65 37 45 27 50C17 55 22 40 22 30Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- 첫 화면 -->
+<main id="home" class="screen">
+  <header class="brand">
+    <svg class="logo" aria-hidden="true"><use href="#logo"/></svg>
+    <div>
+      <h1>조각조각 퍼즐</h1>
+      <p>그림을 조각조각, 다시 하나로.</p>
+    </div>
+  </header>
+
+  <button id="resume" class="resume" type="button" hidden>
+    <span class="resume-thumb" id="resumeThumb"></span>
+    <span class="resume-text">
+      <b>이어하기</b>
+      <small id="resumeInfo"></small>
+    </span>
+    <span class="resume-go" aria-hidden="true">▶</span>
+  </button>
+
+  <section class="daily" aria-labelledby="dailyTitle">
+    <div class="daily-thumb" id="dailyThumb"></div>
+    <div class="daily-text">
+      <span class="tag" id="dailyDate">오늘의 퍼즐</span>
+      <h2 id="dailyTitle">오늘의 퍼즐</h2>
+      <p>날마다 새 그림이 찾아와요. 같은 날엔 모두가 같은 그림과 같은 조각 모양으로 겨뤄요.</p>
+      <p class="daily-best" id="dailyBest" hidden></p>
+      <button id="playDaily" class="btn primary big" type="button">도전하기</button>
+    </div>
+  </section>
+
+  <section class="modes" aria-label="퍼즐 고르기">
+    <button id="playRandom" class="mode" type="button">
+      <span class="ico" aria-hidden="true">🎲</span>
+      <span><b>랜덤 그림</b><small>누를 때마다 새로 그려지는 그림</small></span>
+    </button>
+    <button id="playPhoto" class="mode" type="button">
+      <span class="ico" aria-hidden="true">📷</span>
+      <span><b>내 사진으로</b><small>갤러리 사진으로 나만의 퍼즐</small></span>
+    </button>
+    <button id="openRecords" class="mode" type="button">
+      <span class="ico" aria-hidden="true">🏆</span>
+      <span><b>내 기록</b><small>난이도별 최고 점수와 지난 퍼즐</small></span>
+    </button>
+  </section>
+
+  <section class="howto" aria-labelledby="howtoTitle">
+    <h2 id="howtoTitle">이렇게 놀아요</h2>
+    <ol>
+      <li><b>조각을 끌어서</b> 판 위 제자리 가까이에 놓으면 딸깍 붙어요.</li>
+      <li><b>빠를수록, 실수 없이</b> 맞출수록 점수가 높아요. 판 위 엉뚱한 자리에 놓으면 실수로 쳐요.</li>
+      <li>막히면 <b>미리보기</b>로 완성 그림을 보거나, <b>밑그림</b>을 켜 보세요. (밑그림을 쓰면 점수가 15% 줄어요)</li>
+    </ol>
+  </section>
+
+  <footer class="foot">
+    <button id="install" class="btn ghost" type="button" hidden>📲 앱으로 설치하기</button>
+    <p>사진은 내 기기 안에서만 쓰이고 어디로도 보내지 않아요.<br>기록은 이 브라우저에 저장돼요.</p>
+    <p class="muted">© 조각조각 퍼즐 · zogakzogakpuzzle.com</p>
+  </footer>
+</main>
+
+<!-- 퍼즐 화면 -->
+<section id="game" class="screen" hidden aria-label="퍼즐 판">
+  <header class="hud">
+    <button id="menuBtn" class="icon-btn" type="button" aria-label="메뉴 (일시정지)" title="메뉴">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="hud-title"><b id="hudTitle"></b><small id="hudLevel"></small></div>
+    <span class="stat" title="걸린 시간"><span class="sr-only">걸린 시간 </span><span id="hudTime">00:00</span></span>
+    <span class="stat" title="맞춘 조각"><span class="sr-only">맞춘 조각 </span><span id="hudCount">0/0</span></span>
+    <span class="hud-gap"></span>
+    <button id="previewBtn" class="icon-btn" type="button" aria-label="완성 그림 미리보기" title="미리보기">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+    <button id="ghostBtn" class="icon-btn" type="button" aria-pressed="false" aria-label="판에 밑그림 보이기 (점수 15% 감소)" title="밑그림">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+    </button>
+    <button id="shuffleBtn" class="icon-btn" type="button" aria-label="남은 조각 다시 흩어 놓기" title="조각 흩기">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+    </button>
+  </header>
+  <div class="progress" aria-hidden="true"><span id="hudBar"></span></div>
+  <canvas id="board" aria-label="퍼즐 판. 조각을 끌어서 제자리에 놓으세요."></canvas>
+  <p id="live" class="sr-only" aria-live="polite"></p>
+</section>
+
+<!-- 기록 화면 -->
+<main id="records" class="screen" hidden>
+  <header class="page-head">
+    <button id="recordsBack" class="btn ghost" type="button">← 처음으로</button>
+    <h1>내 기록</h1>
+  </header>
+  <div class="tabs" role="tablist" id="recordTabs" aria-label="난이도"></div>
+  <ol class="rec-list" id="bestList"></ol>
+  <h2 class="sub">최근에 맞춘 퍼즐</h2>
+  <ol class="rec-list" id="recentList"></ol>
+  <button id="clearRecords" class="btn ghost danger" type="button">기록 모두 지우기</button>
+</main>
+
+<!-- 퍼즐 준비 -->
+<dialog id="setup" aria-labelledby="setupTitle">
+  <div class="sheet">
+    <div class="setup-preview" id="setupPreview"></div>
+    <h2 id="setupTitle"></h2>
+    <fieldset class="levels" id="levels">
+      <legend>조각 수</legend>
+    </fieldset>
+    <div class="actions">
+      <button id="setupReroll" class="btn" type="button">🎲 다른 그림</button>
+      <button id="setupCancel" class="btn ghost" type="button">취소</button>
+      <button id="setupStart" class="btn primary" type="button">시작!</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 일시정지 -->
+<dialog id="pause" aria-labelledby="pauseTitle">
+  <div class="sheet">
+    <h2 id="pauseTitle">잠깐 쉬어요</h2>
+    <p class="muted center" id="pauseInfo"></p>
+    <div class="actions col">
+      <button id="pauseResume" class="btn primary" type="button">계속하기</button>
+      <button id="pauseRestart" class="btn" type="button">처음부터 다시</button>
+      <button id="pauseSound" class="btn" type="button">🔊 소리 켜짐</button>
+      <button id="pauseHome" class="btn ghost" type="button">나가기 (나중에 이어하기)</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 미리보기 -->
+<dialog id="preview" class="wide" aria-label="완성 그림 미리보기">
+  <div class="sheet">
+    <div class="preview-art" id="previewArt"></div>
+    <div class="actions"><button id="previewClose" class="btn primary" type="button">닫기</button></div>
+  </div>
+</dialog>
+
+<!-- 완성 -->
+<dialog id="done" aria-labelledby="doneTitle">
+  <div class="sheet">
+    <div class="done-art" id="doneArt"></div>
+    <h2 id="doneTitle">완성! <span class="stars" id="doneStars"></span></h2>
+    <p class="badge" id="doneBest" hidden>🏅 새 최고 기록!</p>
+    <dl class="stats">
+      <div><dt>걸린 시간</dt><dd id="doneTime"></dd></div>
+      <div><dt>정확도</dt><dd id="doneAcc"></dd></div>
+      <div><dt>점수</dt><dd id="doneScore"></dd></div>
+    </dl>
+    <p class="muted center" id="doneNote"></p>
+    <div class="actions">
+      <button id="doneShare" class="btn" type="button">공유하기</button>
+      <button id="doneAgain" class="btn" type="button">한 번 더</button>
+      <button id="doneHome" class="btn primary" type="button">새 퍼즐</button>
+    </div>
+  </div>
+</dialog>
+
+<input type="file" id="photoInput" accept="image/*" hidden>
+<div id="toast" class="toast" popover="manual" role="status" aria-live="polite" hidden></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
